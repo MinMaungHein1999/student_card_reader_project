@@ -3,21 +3,16 @@ from PIL import Image, ImageEnhance, ImageFilter
 
 def preprocess_image(image_path):
     try:
-        # Load the image
-        img = Image.open(image_path).convert('L') # Convert to grayscale
+        img = Image.open(image_path).convert('L')
         print("Image loaded and converted to grayscale.")
 
-        # Increase contrast
         enhancer = ImageEnhance.Contrast(img)
         img = enhancer.enhance(2.0)
         print("Contrast enhanced.")
 
-        # Apply a sharpen filter
         img = img.filter(ImageFilter.SHARPEN)
         print("Image sharpened.")
 
-        # Apply a binary threshold to make text stand out (Binarization)
-        # We define a threshold to turn pixels black or white.
         threshold = 128
         img = img.point(lambda p: p > threshold and 255)
         print("Image binarized.")
@@ -32,7 +27,6 @@ def preprocess_image(image_path):
         return None
 
 def process_student_card(image_path):
-    # First, preprocess the image
     processed_img = preprocess_image(image_path)
     
     if processed_img is None:
@@ -49,7 +43,6 @@ def process_student_card(image_path):
         print(extracted_text)
         print("--------------------------\n")
 
-        # Now, try to find specific information based on keywords.
         lines = extracted_text.split('\n')
         student_id = None
         student_name = None
@@ -57,19 +50,18 @@ def process_student_card(image_path):
         print("--- Searching for specific information ---")
         for line in lines:
             line = line.strip()
-            # More flexible keyword matching for ID and Name
+          
             if "ID" in line.upper() or "NUMBER" in line.upper():
                 # A more robust split
                 parts = line.split(':')
                 if len(parts) > 1:
                     student_id = parts[-1].strip()
-            # More flexible keyword matching for Name
+        
             elif "NAME" in line.upper():
                 parts = line.split(':')
                 if len(parts) > 1:
                     student_name = parts[-1].strip()
             
-            # Example to find a string that looks like an ID number (e.g., all digits)
             if line.isdigit() and len(line) > 5:
                 if student_id is None:
                     student_id = line
